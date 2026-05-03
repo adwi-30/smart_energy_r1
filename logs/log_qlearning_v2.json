@@ -1,7 +1,7 @@
 {
   "experiment": {
     "name": "qlearning_v2",
-    "description": "Extended exploration run \u2014 slower epsilon decay, higher LR",
+    "description": "Extended exploration run \u00e2\u20ac\u201d slower epsilon decay, higher LR",
     "seed": 7
   },
   "training": {
@@ -29,6 +29,6 @@
     "total_entries": 6718464
   },
   "total_episodes": 500,
-  "total_time_seconds": 0.77,
+  "total_time_seconds": 1.6,
   "policy_path": "policies/policy_v2_explored.pkl"
 }
