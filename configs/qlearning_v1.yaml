@@ -1,0 +1,28 @@
+# Q-Learning experiment configuration v1
+# Run: python train.py --config configs/qlearning_v1.yaml
+
+experiment:
+  name: "qlearning_v1"
+  description: "Baseline Q-learning run with moderate exploration"
+  seed: 42
+
+training:
+  n_episodes: 500
+  eval_every: 50       # evaluate greedy policy every N episodes
+  eval_episodes: 10    # episodes used for evaluation average
+
+agent:
+  learning_rate: 0.1
+  gamma: 0.95
+  epsilon_start: 1.0
+  epsilon_min: 0.05
+  epsilon_decay: 0.995
+
+environment:
+  seed: 42
+  num_zones: 4
+
+output:
+  policy_path: "policies/policy_v1.pkl"
+  results_path: "experiments/results_qlearning_v1.csv"
+  log_path: "logs/log_qlearning_v1.json"

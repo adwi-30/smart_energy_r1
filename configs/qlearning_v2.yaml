@@ -1,0 +1,29 @@
+# Q-Learning experiment configuration v2
+# Run: python train.py --config configs/qlearning_v2.yaml
+# Difference from v1: slower epsilon decay → more exploration → different policy
+
+experiment:
+  name: "qlearning_v2"
+  description: "Extended exploration run — slower epsilon decay, higher LR"
+  seed: 7
+
+training:
+  n_episodes: 500
+  eval_every: 50
+  eval_episodes: 10
+
+agent:
+  learning_rate: 0.2
+  gamma: 0.95
+  epsilon_start: 1.0
+  epsilon_min: 0.05
+  epsilon_decay: 0.990    # slower decay → more exploration
+
+environment:
+  seed: 7
+  num_zones: 4
+
+output:
+  policy_path: "policies/policy_v2_explored.pkl"
+  results_path: "experiments/results_qlearning_v2.csv"
+  log_path: "logs/log_qlearning_v2.json"

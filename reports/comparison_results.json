@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "avg_reward": -490.4663506365523,
+    "avg_energy": 111.60000000000008,
+    "avg_comfort_violation": 378.5963506365525
+  },
+  "rl_policy": {
+    "avg_reward": -897.5601883040114,
+    "avg_energy": 89.72000000000004,
+    "avg_comfort_violation": 761.2576883040114
+  }
+}
