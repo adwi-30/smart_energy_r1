@@ -29,6 +29,6 @@
     "total_entries": 6718464
   },
   "total_episodes": 500,
-  "total_time_seconds": 0.8,
+  "total_time_seconds": 1.32,
   "policy_path": "policies/policy_v1.pkl"
 }
