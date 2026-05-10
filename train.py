@@ -20,6 +20,7 @@ from pathlib import Path
 
 import numpy as np
 import yaml
+import mlflow
 
 # Make sure project root is on path
 sys.path.insert(0, str(Path(__file__).parent))
@@ -78,6 +79,8 @@ def train(config_path: str):
     log_path = cfg["output"]["log_path"]
     for p in [policy_path, results_path, log_path]:
         Path(p).parent.mkdir(parents=True, exist_ok=True)
+        
+    mlflow.set_experiment("SmartEnergyRL")
 
     # Environment
     env_seed = cfg["environment"]["seed"]
@@ -118,7 +121,18 @@ def train(config_path: str):
     # ---------------------------------------------------------------------------
     print(f"  Training for {n_episodes} episodes...\n")
 
-    for ep in range(1, n_episodes + 1):
+    with mlflow.start_run(run_name=exp_name):
+        mlflow.log_params({
+            "learning_rate": a["learning_rate"],
+            "gamma": a["gamma"],
+            "epsilon_start": a["epsilon_start"],
+            "epsilon_min": a["epsilon_min"],
+            "epsilon_decay": a["epsilon_decay"],
+            "seed": cfg["experiment"]["seed"],
+            "n_episodes": n_episodes
+        })
+
+        for ep in range(1, n_episodes + 1):
         state = env.reset()
         ep_reward = 0.0
 
@@ -146,6 +160,12 @@ def train(config_path: str):
                 f"ε: {agent.epsilon:.4f} | "
                 f"t: {elapsed:.0f}s"
             )
+            mlflow.log_metrics({
+                "train_reward": ep_reward,
+                "eval_avg_reward": eval_metrics["avg_reward"],
+                "eval_avg_energy": eval_metrics["avg_energy"],
+                "epsilon": agent.epsilon
+            }, step=ep)
 
         csv_rows.append({
             "run_id": exp_name,
@@ -160,49 +180,56 @@ def train(config_path: str):
             "epsilon_decay": a["epsilon_decay"],
         })
 
-    # ---------------------------------------------------------------------------
-    # Save policy
-    # ---------------------------------------------------------------------------
-    agent.save(policy_path)
+        # ---------------------------------------------------------------------------
+        # Save policy
+        # ---------------------------------------------------------------------------
+        agent.save(policy_path)
+        mlflow.log_artifact(policy_path, artifact_path="model")
 
-    # Also save a mid-training checkpoint at episode 50 for "policy_v1" variant
-    # (to demonstrate two policy versions exist)
-    mid_path = policy_path.replace(".pkl", "_mid.pkl")
-    agent.save(mid_path)
+        # Also save a mid-training checkpoint at episode 50 for "policy_v1" variant
+        # (to demonstrate two policy versions exist)
+        mid_path = policy_path.replace(".pkl", "_mid.pkl")
+        agent.save(mid_path)
 
-    # ---------------------------------------------------------------------------
-    # Write CSV results
-    # ---------------------------------------------------------------------------
-    with open(results_path, "w", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=csv_header)
-        writer.writeheader()
-        writer.writerows(csv_rows)
-    print(f"\n  Results saved → {results_path}")
+        # ---------------------------------------------------------------------------
+        # Write CSV results
+        # ---------------------------------------------------------------------------
+        with open(results_path, "w", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=csv_header)
+            writer.writeheader()
+            writer.writerows(csv_rows)
+        print(f"\n  Results saved → {results_path}")
 
-    # ---------------------------------------------------------------------------
-    # Write JSON log
-    # ---------------------------------------------------------------------------
-    final_eval = evaluate_agent(agent, env, n_eval=20)
-    q_summary = agent.q_table_summary()
-    log = {
-        "experiment": cfg["experiment"],
-        "training": cfg["training"],
-        "agent_params": cfg["agent"],
-        "final_eval": final_eval,
-        "q_table_summary": q_summary,
-        "total_episodes": n_episodes,
-        "total_time_seconds": round(time.time() - start_time, 2),
-        "policy_path": policy_path,
-    }
-    with open(log_path, "w") as f:
-        json.dump(log, f, indent=2)
-    print(f"  Log saved   → {log_path}")
+        # ---------------------------------------------------------------------------
+        # Write JSON log
+        # ---------------------------------------------------------------------------
+        final_eval = evaluate_agent(agent, env, n_eval=20)
+        
+        mlflow.log_metrics({
+            "final_eval_reward": final_eval['avg_reward'],
+            "final_eval_energy": final_eval['avg_energy']
+        })
+        
+        q_summary = agent.q_table_summary()
+        log = {
+            "experiment": cfg["experiment"],
+            "training": cfg["training"],
+            "agent_params": cfg["agent"],
+            "final_eval": final_eval,
+            "q_table_summary": q_summary,
+            "total_episodes": n_episodes,
+            "total_time_seconds": round(time.time() - start_time, 2),
+            "policy_path": policy_path,
+        }
+        with open(log_path, "w") as f:
+            json.dump(log, f, indent=2)
+        print(f"  Log saved   → {log_path}")
 
-    print(f"\n  {'='*50}")
-    print(f"  Final eval avg reward : {final_eval['avg_reward']:.2f}")
-    print(f"  Final eval avg energy : {final_eval['avg_energy']:.2f}")
-    print(f"  Q-table nonzero entries: {q_summary['nonzero_entries']} / {q_summary['total_entries']}")
-    print(f"  {'='*50}\n")
+        print(f"\n  {'='*50}")
+        print(f"  Final eval avg reward : {final_eval['avg_reward']:.2f}")
+        print(f"  Final eval avg energy : {final_eval['avg_energy']:.2f}")
+        print(f"  Q-table nonzero entries: {q_summary['nonzero_entries']} / {q_summary['total_entries']}")
+        print(f"  {'='*50}\n")
 
     return train_rewards, final_eval
 

@@ -13,6 +13,21 @@ Train an RL agent to control HVAC and lighting across four office-building zones
 **minimise energy consumption** while maintaining **occupant comfort** (20–26 °C).
 Baseline: a fixed rule-based timer that runs all equipment during business hours.
 
+### MLOps Architecture
+
+```mermaid
+graph TD
+    A[Building Env Simulator] -->|Data| B(Train Q-Learning Agent)
+    B -->|Logs Params/Metrics| C[MLFlow Tracking]
+    B -->|Registers Model| D[MLFlow Model Registry]
+    D -->|Loads Best Model| E[FastAPI REST API]
+    E -->|Containerized| F[Docker / Kubernetes]
+    F -->|Predictions| G(Client Dashboard)
+    
+    H[GitHub Actions CI/CD] -->|Tests & Builds| E
+    I[DVC] -.->|Tracks Datasets| A
+```
+
 ---
 
 ## Quick Start
