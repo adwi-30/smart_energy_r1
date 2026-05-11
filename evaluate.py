@@ -116,7 +116,7 @@ def plot_training_curve(results_csv: str, out_dir: str = "reports"):
     out_path = f"{out_dir}/training_curve.png"
     plt.savefig(out_path, dpi=150, bbox_inches="tight")
     plt.close()
-    print(f"  Plot saved → {out_path}")
+    print(f"  Plot saved -> {out_path}")
 
 
 def plot_comparison(baseline: dict, rl: dict, out_dir: str = "reports"):
@@ -157,7 +157,7 @@ def plot_comparison(baseline: dict, rl: dict, out_dir: str = "reports"):
     out_path = f"{out_dir}/baseline_vs_rl.png"
     plt.savefig(out_path, dpi=150, bbox_inches="tight")
     plt.close()
-    print(f"  Plot saved → {out_path}")
+    print(f"  Plot saved -> {out_path}")
 
 
 # ---------------------------------------------------------------------------
@@ -189,4 +189,4 @@ if __name__ == "__main__":
     }
     with open("reports/comparison_results.json", "w") as f:
         json.dump(comparison, f, indent=2)
-    print("  Comparison saved → reports/comparison_results.json")
+    print("  Comparison saved -> reports/comparison_results.json")
