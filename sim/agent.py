@@ -113,7 +113,7 @@ class QLearningAgent:
         Path(path).parent.mkdir(parents=True, exist_ok=True)
         with open(path, "wb") as f:
             pickle.dump(payload, f)
-        print(f"  [Agent] Policy saved → {path}")
+        print(f"  [Agent] Policy saved -> {path}")
 
     def load(self, path: str):
         """Load Q-table and hyperparameters from a .pkl file."""

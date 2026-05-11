@@ -133,52 +133,52 @@ def train(config_path: str):
         })
 
         for ep in range(1, n_episodes + 1):
-        state = env.reset()
-        ep_reward = 0.0
+            state = env.reset()
+            ep_reward = 0.0
 
-        for _ in range(24):  # one full day = one episode
-            action = agent.select_action(state)
-            next_state, reward, done, info = env.step(action)
-            agent.update(state, action, reward, next_state, done)
-            state = next_state
-            ep_reward += reward
-            if done:
-                break
+            for _ in range(24):  # one full day = one episode
+                action = agent.select_action(state)
+                next_state, reward, done, info = env.step(action)
+                agent.update(state, action, reward, next_state, done)
+                state = next_state
+                ep_reward += reward
+                if done:
+                    break
 
-        agent.decay_epsilon()
-        train_rewards.append(ep_reward)
+            agent.decay_epsilon()
+            train_rewards.append(ep_reward)
 
-        # Periodic evaluation
-        eval_metrics = {"avg_reward": np.nan, "avg_energy": np.nan, "avg_comfort_violation": np.nan}
-        if ep % eval_every == 0:
-            eval_metrics = evaluate_agent(agent, env, eval_episodes)
-            elapsed = time.time() - start_time
-            print(
-                f"  Ep {ep:>4d}/{n_episodes} | "
-                f"Train R: {ep_reward:7.2f} | "
-                f"Eval R: {eval_metrics['avg_reward']:7.2f} | "
-                f"ε: {agent.epsilon:.4f} | "
-                f"t: {elapsed:.0f}s"
-            )
-            mlflow.log_metrics({
-                "train_reward": ep_reward,
-                "eval_avg_reward": eval_metrics["avg_reward"],
-                "eval_avg_energy": eval_metrics["avg_energy"],
-                "epsilon": agent.epsilon
-            }, step=ep)
+            # Periodic evaluation
+            eval_metrics = {"avg_reward": np.nan, "avg_energy": np.nan, "avg_comfort_violation": np.nan}
+            if ep % eval_every == 0:
+                eval_metrics = evaluate_agent(agent, env, eval_episodes)
+                elapsed = time.time() - start_time
+                print(
+                    f"  Ep {ep:>4d}/{n_episodes} | "
+                    f"Train R: {ep_reward:7.2f} | "
+                    f"Eval R: {eval_metrics['avg_reward']:7.2f} | "
+                    f"eps: {agent.epsilon:.4f} | "
+                    f"t: {elapsed:.0f}s"
+                )
+                mlflow.log_metrics({
+                    "train_reward": ep_reward,
+                    "eval_avg_reward": eval_metrics["avg_reward"],
+                    "eval_avg_energy": eval_metrics["avg_energy"],
+                    "epsilon": agent.epsilon
+                }, step=ep)
 
-        csv_rows.append({
-            "run_id": exp_name,
-            "episode": ep,
-            "train_reward": round(ep_reward, 4),
-            "eval_avg_reward": round(eval_metrics["avg_reward"], 4) if not np.isnan(eval_metrics["avg_reward"]) else "",
-            "eval_avg_energy": round(eval_metrics["avg_energy"], 4) if not np.isnan(eval_metrics["avg_energy"]) else "",
-            "eval_avg_comfort_violation": round(eval_metrics["avg_comfort_violation"], 4) if not np.isnan(eval_metrics["avg_comfort_violation"]) else "",
-            "epsilon": round(agent.epsilon, 6),
-            "learning_rate": a["learning_rate"],
-            "gamma": a["gamma"],
-            "epsilon_decay": a["epsilon_decay"],
-        })
+            csv_rows.append({
+                "run_id": exp_name,
+                "episode": ep,
+                "train_reward": round(ep_reward, 4),
+                "eval_avg_reward": round(eval_metrics["avg_reward"], 4) if not np.isnan(eval_metrics["avg_reward"]) else "",
+                "eval_avg_energy": round(eval_metrics["avg_energy"], 4) if not np.isnan(eval_metrics["avg_energy"]) else "",
+                "eval_avg_comfort_violation": round(eval_metrics["avg_comfort_violation"], 4) if not np.isnan(eval_metrics["avg_comfort_violation"]) else "",
+                "epsilon": round(agent.epsilon, 6),
+                "learning_rate": a["learning_rate"],
+                "gamma": a["gamma"],
+                "epsilon_decay": a["epsilon_decay"],
+            })
 
         # ---------------------------------------------------------------------------
         # Save policy
@@ -198,7 +198,7 @@ def train(config_path: str):
             writer = csv.DictWriter(f, fieldnames=csv_header)
             writer.writeheader()
             writer.writerows(csv_rows)
-        print(f"\n  Results saved → {results_path}")
+        print(f"\n  Results saved -> {results_path}")
 
         # ---------------------------------------------------------------------------
         # Write JSON log
@@ -223,7 +223,7 @@ def train(config_path: str):
         }
         with open(log_path, "w") as f:
             json.dump(log, f, indent=2)
-        print(f"  Log saved   → {log_path}")
+        print(f"  Log saved   -> {log_path}")
 
         print(f"\n  {'='*50}")
         print(f"  Final eval avg reward : {final_eval['avg_reward']:.2f}")
