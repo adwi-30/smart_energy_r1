@@ -17,15 +17,15 @@ Baseline: a fixed rule-based timer that runs all equipment during business hours
 
 ```mermaid
 graph TD
-    A[Building Env Simulator] -->|Data| B(Train Q-Learning Agent)
-    B -->|Logs Params/Metrics| C[MLFlow Tracking]
-    B -->|Registers Model| D[MLFlow Model Registry]
+    A[Building Env Simulator] -->|State/Reward| B(Train Q-Learning Agent)
+    B -->|Logs Params & Metrics| C[MLflow Tracking]
+    B -->|Saves Policy .pkl| D[Git Tags / Model Registry]
     D -->|Loads Best Model| E[FastAPI REST API]
     E -->|Containerized| F[Docker / Kubernetes]
-    F -->|Predictions| G(Client Dashboard)
-    
-    H[GitHub Actions CI/CD] -->|Tests & Builds| E
-    I[DVC] -.->|Tracks Datasets| A
+    F -->|Predictions| G(Streamlit Dashboard)
+
+    H[GitHub Actions CI/CD] -->|Tests & Builds on Push| E
+    I[scripts/rollback.py] -.->|Rollback to Tag| D
 ```
 
 ---
@@ -97,12 +97,17 @@ smart_energy_rl/
 
 ## Results Summary
 
-| Metric | Rule-based | RL policy | Change |
+| Metric | Rule-based | RL policy (v1) | Change |
 |---|---|---|---|
-| Avg energy cost / episode | 111.6 | 89.7 | **−19.6%** |
-| Avg episode reward | −490.5 | −897.6 | — |
+| Avg energy cost / episode | 111.60 | 92.94 | **−16.7%** |
+| Avg episode reward | −490.47 | −770.85 | — |
+| Avg comfort violation / ep | 378.60 | 635.59 | — |
 
-**SDG 13 impact:** ~20% energy reduction → ~2–4 tonnes CO₂/year saved per building.
+> Numbers produced by: `python evaluate.py --policy policies/policy_v1.pkl --n_eval 100` (seed=0, 100 episodes).
+
+**SDG 13 impact:** ~17% energy reduction → ~1.5–3 tonnes CO₂/year saved per building.
+
+> **Note on DVC:** DVC was evaluated for artifact versioning but not adopted, as policy `.pkl` files are <1 MB and are tracked directly via Git tags.
 
 ---
 
