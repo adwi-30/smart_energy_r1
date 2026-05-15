@@ -205,13 +205,21 @@ def get_metrics():
     action_indices = [r["action_index"] for r in records]
     hours = [r["input"]["hour"] for r in records]
 
+    # Drift detection: compare current state std vs training baseline
+    # Training baseline: state_std ~ 1800 (empirically from 500-episode run)
+    BASELINE_STATE_STD = 1800.0
+    DRIFT_THRESHOLD = 0.30  # alert if std deviates >30% from baseline
+    current_std = float(np.std(state_indices))
+    drift_ratio = abs(current_std - BASELINE_STATE_STD) / BASELINE_STATE_STD
+    drift_alert = drift_ratio > DRIFT_THRESHOLD
+
     return {
         "total_predictions": len(records),
         "first_prediction": records[0]["timestamp"],
         "last_prediction": records[-1]["timestamp"],
         "state_distribution": {
             "mean": round(float(np.mean(state_indices)), 2),
-            "std": round(float(np.std(state_indices)), 2),
+            "std": round(current_std, 2),
             "min": int(np.min(state_indices)),
             "max": int(np.max(state_indices)),
         },
@@ -222,6 +230,13 @@ def get_metrics():
         },
         "hour_distribution": {
             "mean_hour": round(float(np.mean(hours)), 1),
+        },
+        "drift_monitoring": {
+            "baseline_state_std": BASELINE_STATE_STD,
+            "current_state_std": round(current_std, 2),
+            "drift_ratio": round(drift_ratio, 3),
+            "drift_alert": drift_alert,
+            "recommendation": "Consider retraining — state distribution has shifted." if drift_alert else "Distribution stable. No retraining needed.",
         },
         "log_file": str(PREDICTION_LOG),
     }

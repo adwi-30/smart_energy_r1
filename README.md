@@ -116,3 +116,11 @@ smart_energy_rl/
 - `reports/RL_Report_PartA.md` — RL methodology (algorithm, state, action, reward, convergence)
 - `reports/MLOps_Report_PartB.md` — MLOps (versioning, tracking, reproducibility, monitoring plan)
 - `reports/Final_Report.md` — Combined final report with SDG impact analysis
+- `docs/requirements.md` — **Full requirements analysis**: stakeholders, use cases, functional & non-functional requirements, feasibility, constraints, trade-offs, risks, and traceability matrix
+
+---
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for branch strategy, PR checklist, and commit conventions.
+
