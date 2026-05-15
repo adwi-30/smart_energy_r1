@@ -19,5 +19,26 @@ def test_predict_action():
         data = response.json()
         assert "hvac_on" in data
         assert "lighting_on" in data
+        assert "state_index" in data
+        assert "action_index" in data
+        assert "timestamp" in data
         assert len(data["hvac_on"]) == 4
         assert len(data["lighting_on"]) == 4
+
+def test_metrics_endpoint():
+    with TestClient(app) as client:
+        response = client.get("/metrics")
+        assert response.status_code == 200
+        data = response.json()
+        assert "total_predictions" in data
+
+def test_invalid_input():
+    with TestClient(app) as client:
+        # Wrong number of zones
+        payload = {
+            "hour": 10,
+            "occupancies": [1, 1],   # only 2 zones — should fail
+            "temperatures": [1, 1, 1, 1]
+        }
+        response = client.post("/predict", json=payload)
+        assert response.status_code == 400
