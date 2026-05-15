@@ -5,8 +5,8 @@
     "avg_comfort_violation": 378.5963506365525
   },
   "rl_policy": {
-    "avg_reward": -897.5601883040114,
-    "avg_energy": 89.72000000000004,
-    "avg_comfort_violation": 761.2576883040114
+    "avg_reward": -770.8491786580978,
+    "avg_energy": 92.94000000000004,
+    "avg_comfort_violation": 635.5941786580981
   }
 }
