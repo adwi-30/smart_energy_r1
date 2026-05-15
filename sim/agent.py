@@ -122,7 +122,7 @@ class QLearningAgent:
         self.Q = payload["Q"]
         self.epsilon = payload["epsilon"]
         self.episode_count = payload["episode_count"]
-        print(f"  [Agent] Policy loaded ← {path}  (episode {self.episode_count})")
+        print(f"  [Agent] Policy loaded <- {path}  (episode {self.episode_count})")
 
     # ------------------------------------------------------------------
     # Diagnostics

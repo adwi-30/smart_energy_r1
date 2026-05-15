@@ -1,0 +1,1 @@
+{"timestamp": "2026-05-15T17:47:29.136173+00:00", "input": {"hour": 14, "occupancies": [2, 1, 0, 0], "temperatures": [1, 1, 1, 1]}, "state_index": 12982, "action_index": 0, "output": {"hvac_on": [false, false, false, false], "lighting_on": [false, false, false, false]}}
