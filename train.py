@@ -80,6 +80,10 @@ def train(config_path: str):
     for p in [policy_path, results_path, log_path]:
         Path(p).parent.mkdir(parents=True, exist_ok=True)
         
+    # Ensure MLflow uses a local tracking URI relative to this project
+    # This fixes permission errors if the repo was cloned from a machine with different paths
+    mlflow_dir = Path(__file__).parent.absolute() / "mlruns"
+    mlflow.set_tracking_uri(f"file:///{mlflow_dir}")
     mlflow.set_experiment("SmartEnergyRL")
 
     # Environment

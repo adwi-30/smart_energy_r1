@@ -5,7 +5,7 @@
     "seed": 7
   },
   "training": {
-    "n_episodes": 500,
+    "n_episodes": 50000,
     "eval_every": 50,
     "eval_episodes": 10
   },
@@ -17,18 +17,18 @@
     "epsilon_decay": 0.99
   },
   "final_eval": {
-    "avg_reward": -919.822852655222,
-    "avg_energy": 86.775,
-    "avg_comfort_violation": 788.7603526552223
+    "avg_reward": -429.28811892883823,
+    "avg_energy": 142.925,
+    "avg_comfort_violation": 222.12561892883838
   },
   "q_table_summary": {
-    "mean_q": -0.010160778140135144,
+    "mean_q": -0.43215338688894656,
     "max_q": 0.0,
-    "min_q": -85.1369554604639,
-    "nonzero_entries": 6140,
+    "min_q": -206.89563096576128,
+    "nonzero_entries": 38420,
     "total_entries": 6718464
   },
-  "total_episodes": 500,
-  "total_time_seconds": 1.6,
+  "total_episodes": 50000,
+  "total_time_seconds": 195.46,
   "policy_path": "policies/policy_v2_explored.pkl"
 }

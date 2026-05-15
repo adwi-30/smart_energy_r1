@@ -47,7 +47,7 @@ async def lifespan(app: FastAPI):
     global agent, env
     env = BuildingEnv(seed=42)
     agent = QLearningAgent(n_states=env.n_states, n_actions=env.n_actions)
-    policy_path = "policies/policy_v1.pkl"
+    policy_path = "policies/policy_v2_explored.pkl"
     try:
         agent.load(policy_path)
         logger.info(f"Loaded RL policy from {policy_path}")
@@ -92,16 +92,19 @@ class ActionOutput(BaseModel):
 # Helper: encode state
 # ---------------------------------------------------------------------------
 def encode_state(hour: int, occupancies: list, temperatures: list) -> int:
+    """Map continuous state -> discrete integer index (matches BuildingEnv.py)."""
     hour_bin = min(hour // 6, 3)
-    state_idx = hour_bin
-    multiplier = 4
-    for o in occupancies:
-        state_idx += o * multiplier
-        multiplier *= 3
-    for t in temperatures:
-        state_idx += t * multiplier
-        multiplier *= 3
-    return state_idx
+    
+    occ_idx = 0
+    for z, o in enumerate(occupancies):
+        occ_idx += o * (3 ** z)
+        
+    temp_idx = 0
+    for z, t in enumerate(temperatures):
+        temp_idx += t * (3 ** z)
+        
+    # State = hour_bin * 3^4 * 3^4 + occ_idx * 3^4 + temp_idx
+    return (hour_bin * 6561) + (occ_idx * 81) + temp_idx
 
 # ---------------------------------------------------------------------------
 # Helper: structured prediction log (for drift monitoring)
@@ -152,27 +155,31 @@ def predict_action(state_input: StateInput):
     if agent is None:
         raise HTTPException(status_code=503, detail="Model not loaded.")
 
+    # Calculate state index to match BuildingEnv.py
     state_idx = encode_state(
         state_input.hour,
         state_input.occupancies,
         state_input.temperatures
     )
-
+        
+    # Get action
     action_idx = agent.select_action(state_idx, eval_mode=True)
-
-    # Decode action into per-zone HVAC + lighting
-    hvac, light = [], []
+    
+    # Decode action
+    hvac = []
+    light = []
     temp_action = action_idx
     for _ in range(4):
         zone_act = temp_action % 4
         hvac.append(bool(zone_act & 1))
         light.append(bool((zone_act >> 1) & 1))
         temp_action //= 4
-
-    ts = datetime.now(timezone.utc).isoformat()
+        
+    logger.info(f"Prediction requested (v2). State: {state_idx}, Action: {action_idx}")
     logger.info(f"Predict | hour={state_input.hour} | state={state_idx} | action={action_idx}")
     log_prediction(state_input, state_idx, action_idx, hvac, light)
 
+    ts = datetime.now(timezone.utc).isoformat()
     return ActionOutput(
         hvac_on=hvac,
         lighting_on=light,

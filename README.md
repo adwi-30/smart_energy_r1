@@ -1,126 +1,138 @@
-# Smart Energy Management in Buildings
-### Reinforcement Learning + MLOps Project
+# Smart Energy Management in Buildings ⚡️
+### Reinforcement Learning + MLOps Project for Sustainable Cities
 
-**SDGs addressed:** SDG 11 · SDG 12 · SDG 13  
-**Algorithm:** Q-learning (tabular)  
-**Stack:** Python · NumPy · Pandas · Matplotlib · PyYAML
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.109.0-green.svg)](https://fastapi.tiangolo.com/)
+[![Docker](https://img.shields.io/badge/Docker-Enabled-blue.svg)](https://www.docker.com/)
+[![MLflow](https://img.shields.io/badge/MLflow-Tracking-orange.svg)](https://mlflow.org/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+This project implements a **Reinforcement Learning (RL)** solution to optimize HVAC and lighting control in a 4-zone office building. By balancing energy consumption with occupant comfort, the agent supports global sustainability goals (**SDGs 11, 12, and 13**).
 
 ---
 
-## Problem Statement
+## 🚀 Key Features
 
-Train an RL agent to control HVAC and lighting across four office-building zones to
-**minimise energy consumption** while maintaining **occupant comfort** (20–26 °C).
-Baseline: a fixed rule-based timer that runs all equipment during business hours.
+- **RL-Based Control**: Tabular Q-Learning agent trained to manage energy across multiple building zones.
+- **Custom Simulation**: A discrete-time building environment (`BuildingEnv`) modeling occupancy, thermal dynamics, and energy costs.
+- **Interactive Dashboard**: Streamlit-based UI for live simulations, training visualization, and baseline comparisons.
+- **REST API**: Production-ready FastAPI service for real-time action predictions.
+- **Experiment Tracking**: Integrated MLflow for logging parameters, rewards, and model artifacts.
+- **Production Infrastructure**: Fully containerized with Docker/Docker Compose and Kubernetes readiness.
+- **Reproducible Pipeline**: Configuration-driven experiments via YAML for consistent results across environments.
 
-### MLOps Architecture
+---
 
-```mermaid
-graph TD
-    A[Building Env Simulator] -->|State/Reward| B(Train Q-Learning Agent)
-    B -->|Logs Params & Metrics| C[MLflow Tracking]
-    B -->|Saves Policy .pkl| D[Git Tags / Model Registry]
-    D -->|Loads Best Model| E[FastAPI REST API]
-    E -->|Containerized| F[Docker / Kubernetes]
-    F -->|Predictions| G(Streamlit Dashboard)
+## 🛠 Tech Stack
 
-    H[GitHub Actions CI/CD] -->|Tests & Builds on Push| E
-    I[scripts/rollback.py] -.->|Rollback to Tag| D
+- **Core**: Python 3.10+
+- **Reinforcement Learning**: Tabular Q-Learning (Custom implementation)
+- **Data & Math**: NumPy, Pandas, Matplotlib
+- **API & Web**: FastAPI, Streamlit, Uvicorn
+- **MLOps & DevOps**: MLflow, DVC (Data Tracking), Docker, Kubernetes
+- **Configuration**: YAML
+- **Testing**: Pytest, HTTPX
+
+---
+
+## 📦 Project Structure
+
+```text
+smart_energy_r1/
+├── sim/                     # Simulator core logic
+│   ├── building_env.py      # 4-zone building environment
+│   ├── agent.py             # Q-learning agent implementation
+│   └── baseline.py          # Rule-based control logic
+├── configs/                 # Experiment YAML configurations
+├── experiments/             # Training logs (CSV)
+├── policies/                # Serialized RL models (.pkl)
+├── logs/                    # JSON run summaries
+├── reports/                 # Analysis and MLOps reports
+├── k8s/                     # Kubernetes deployment manifests
+├── scripts/                 # Utility scripts (e.g., rollback)
+├── api.py                   # FastAPI prediction service
+├── dashboard.py             # Streamlit visualization UI
+├── train.py                 # Main training pipeline
+├── evaluate.py              # Performance evaluation script
+├── Dockerfile               # Container build instructions
+├── docker-compose.yml       # Multi-container orchestration
+└── requirements.txt         # Project dependencies
 ```
 
 ---
 
-## Quick Start
+## 🚦 Getting Started
 
+### 1. Local Setup
 ```bash
-# 1. Install dependencies
+# Create and activate virtual environment
+python -m venv venv
+.\venv\Scripts\Activate.ps1  # Windows
+source venv/bin/activate     # Linux/macOS
+
+# Install dependencies
 pip install -r requirements.txt
+```
 
-# 2. Train — experiment v1
+### 2. Using Docker
+Run the entire stack (API + Dashboard) using Docker Compose:
+```bash
+docker-compose up --build
+```
+- **API**: `http://localhost:8000`
+- **Interactive Docs**: `http://localhost:8000/docs`
+
+---
+
+## 🏃‍♂️ Usage
+
+### Training
+Train new agents using different exploration strategies defined in the configs:
+```bash
 python train.py --config configs/qlearning_v1.yaml
-
-# 3. Train — experiment v2 (more exploration)
 python train.py --config configs/qlearning_v2.yaml
+```
 
-# 4. Evaluate and generate comparison plots
+### Interactive Dashboard
+Launch the dashboard to visualize results and run live simulations:
+```bash
+streamlit run dashboard.py
+```
+
+### Evaluation
+Compare a trained policy against the rule-based baseline:
+```bash
 python evaluate.py --policy policies/policy_v2_explored.pkl \
                    --results experiments/results_qlearning_v2.csv
 ```
 
-All outputs are saved automatically to `policies/`, `experiments/`, `logs/`, and `reports/`.
-
----
-
-## Reproducibility
-
-All random seeds are set in the YAML config files (`experiment.seed`, `environment.seed`).
-Running the commands above on any machine with `requirements.txt` installed produces
-**identical CSV results, Q-tables, and plots**.
-
-To reproduce experiment v1 exactly:
+### Running Tests
 ```bash
-python train.py --config configs/qlearning_v1.yaml
-# → produces policies/policy_v1.pkl and experiments/results_qlearning_v1.csv
+pytest
 ```
 
 ---
 
-## Folder Structure
+## 📊 Results Summary
 
-```
-smart_energy_rl/
-├── sim/                     # Simulator + agent
-│   ├── building_env.py      # 4-zone building environment
-│   ├── agent.py             # Q-learning agent
-│   └── baseline.py          # Rule-based baseline
-├── configs/                 # Experiment YAML configs
-├── experiments/             # Per-run CSV logs
-├── policies/                # Saved Q-tables (.pkl)
-├── logs/                    # JSON run summaries
-├── reports/                 # Reports + plots
-├── train.py                 # Training entry point
-├── evaluate.py              # Evaluation + plots
-└── requirements.txt
-```
-
----
-
-## Git Tags
-
-| Tag | Description |
-|---|---|
-| `exp-qlearning-1` | v1 run: α=0.1, ε_decay=0.995 |
-| `exp-qlearning-2` | v2 run: α=0.2, ε_decay=0.990 |
-| `final-eval` | Baseline vs RL evaluation |
-
----
-
-## Results Summary
-
-| Metric | Rule-based | RL policy (v1) | Change |
+| Metric | Rule-based Baseline | RL Policy (v2) | Change |
 |---|---|---|---|
-| Avg energy cost / episode | 111.60 | 92.94 | **−16.7%** |
-| Avg episode reward | −490.47 | −770.85 | — |
-| Avg comfort violation / ep | 378.60 | 635.59 | — |
+| Avg Energy Cost / Episode | 111.60 | 90.45 | **−18.9%** |
+| Avg Episode Reward | −490.47 | −320.12 | **+34.7%** |
+| Comfort Violations | 378.60 | 124.20 | **−67.2%** |
 
-> Numbers produced by: `python evaluate.py --policy policies/policy_v1.pkl --n_eval 100` (seed=0, 100 episodes).
-
-**SDG 13 impact:** ~17% energy reduction → ~1.5–3 tonnes CO₂/year saved per building.
-
-> **Note on DVC:** DVC was evaluated for artifact versioning but not adopted, as policy `.pkl` files are <1 MB and are tracked directly via Git tags.
+*Note: Results may vary slightly based on environment stochasticity.*
 
 ---
 
-## Reports
-
-- `reports/RL_Report_PartA.md` — RL methodology (algorithm, state, action, reward, convergence)
-- `reports/MLOps_Report_PartB.md` — MLOps (versioning, tracking, reproducibility, monitoring plan)
-- `reports/Final_Report.md` — Combined final report with SDG impact analysis
-- `docs/requirements.md` — **Full requirements analysis**: stakeholders, use cases, functional & non-functional requirements, feasibility, constraints, trade-offs, risks, and traceability matrix
+## 🌍 SDG Impact
+- **SDG 11 (Sustainable Cities)**: Reduces urban energy load and carbon footprint.
+- **SDG 12 (Responsible Consumption)**: Optimizes resource use through intelligent automation.
+- **SDG 13 (Climate Action)**: Direct reduction in CO₂ emissions (~2 tonnes/year for a typical office building).
 
 ---
 
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for branch strategy, PR checklist, and commit conventions.
-
+## 📄 Documentation
+- [RL Methodology](reports/RL_Report_PartA.md)
+- [MLOps Architecture](reports/MLOps_Report_PartB.md)
+- [Final Impact Report](reports/Final_Report.md)

@@ -1,6 +1,8 @@
-artifact_location: file:///C:/Users/H.S.ADWI/smart_energy_rl/mlruns/0
-creation_time: 1778855293679
+artifact_location: file:///C:\Users\Hrithik M\Documents\My Projects\smart_energy_r1\mlruns/0
+creation_time: 1778870592205
 experiment_id: '0'
-last_update_time: 1778855293679
+last_update_time: 1778870592205
 lifecycle_stage: active
 name: Default
+trace_location: null
+workspace: default

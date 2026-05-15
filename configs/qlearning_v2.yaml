@@ -8,7 +8,7 @@ experiment:
   seed: 7
 
 training:
-  n_episodes: 500
+  n_episodes: 50000
   eval_every: 50
   eval_episodes: 10
 
